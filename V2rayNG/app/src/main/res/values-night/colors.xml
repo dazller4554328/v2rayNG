@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_fab_active">#f97910</color>
+    <color name="color_fab_active">#EF5350</color>
     <color name="color_fab_inactive">#646464</color>
     <color name="divider_color_light">#424242</color>
 
-    <!-- Primary colors - main tone: gray -->
-    <color name="md_theme_primary">#C0C0C0</color>
-    <color name="md_theme_onPrimary">#303030</color>
-    <color name="md_theme_primaryContainer">#474747</color>
-    <color name="md_theme_onPrimaryContainer">#E0E0E0</color>
+    <!-- Primary colors - main tone: light red for dark mode -->
+    <color name="md_theme_primary">#FFB4AB</color>
+    <color name="md_theme_onPrimary">#690005</color>
+    <color name="md_theme_primaryContainer">#93000A</color>
+    <color name="md_theme_onPrimaryContainer">#FFDAD6</color>
 
-    <!-- Secondary colors - accent color: orange -->
-    <color name="md_theme_secondary">#FFB687</color>
-    <color name="md_theme_onSecondary">#4E2600</color>
-    <color name="md_theme_secondaryContainer">#6F3800</color>
-    <color name="md_theme_onSecondaryContainer">#FFE8D6</color>
+    <!-- Secondary colors - accent color: light green for dark mode -->
+    <color name="md_theme_secondary">#A5D6A7</color>
+    <color name="md_theme_onSecondary">#003910</color>
+    <color name="md_theme_secondaryContainer">#1B5E20</color>
+    <color name="md_theme_onSecondaryContainer">#C8E6C9</color>
 
-    <!-- Tertiary colors - tertiary color: green -->
-    <color name="md_theme_tertiary">#83D6B5</color>
-    <color name="md_theme_onTertiary">#00382E</color>
-    <color name="md_theme_tertiaryContainer">#005143</color>
-    <color name="md_theme_onTertiaryContainer">#A0F2D0</color>
+    <!-- Tertiary colors - warm gold for dark mode -->
+    <color name="md_theme_tertiary">#FFD54F</color>
+    <color name="md_theme_onTertiary">#3E2E00</color>
+    <color name="md_theme_tertiaryContainer">#594400</color>
+    <color name="md_theme_onTertiaryContainer">#FFF8E1</color>
 
     <!-- Error colors -->
     <color name="md_theme_error">#FFB4AB</color>
@@ -35,18 +35,18 @@
     <!-- Surface colors -->
     <color name="md_theme_surface">#1C1B1F</color>
     <color name="md_theme_onSurface">#E6E1E5</color>
-    <color name="md_theme_surfaceVariant">#49454F</color>
-    <color name="md_theme_onSurfaceVariant">#CAC4D0</color>
+    <color name="md_theme_surfaceVariant">#534341</color>
+    <color name="md_theme_onSurfaceVariant">#D8C2BF</color>
     <color name="md_theme_inverseSurface">#E6E1E5</color>
     <color name="md_theme_inverseOnSurface">#1C1B1F</color>
 
     <!-- Outline colors -->
-    <color name="md_theme_outline">#938F99</color>
-    <color name="md_theme_outlineVariant">#49454F</color>
+    <color name="md_theme_outline">#A08C8A</color>
+    <color name="md_theme_outlineVariant">#534341</color>
 
     <!-- Other colors -->
-    <color name="md_theme_inversePrimary">#000000</color>
+    <color name="md_theme_inversePrimary">#B71C1C</color>
     <color name="md_theme_shadow">#000000</color>
-    <color name="md_theme_surfaceTint">#C0C0C0</color>
+    <color name="md_theme_surfaceTint">#FFB4AB</color>
     <color name="md_theme_scrim">#000000</color>
 </resources>

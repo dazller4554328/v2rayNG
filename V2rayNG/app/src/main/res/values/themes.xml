@@ -2,19 +2,19 @@
 
     <!-- Common base theme: put all shared items here so day/night can reuse -->
     <style name="AppThemeBase" parent="Theme.Material3.DayNight">
-        <!-- Primary colors - main tone: black -->
+        <!-- Primary colors - main tone: Welsh red -->
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_primaryContainer</item>
         <item name="colorOnPrimaryContainer">@color/md_theme_onPrimaryContainer</item>
 
-        <!-- Secondary colors - accent color: orange -->
+        <!-- Secondary colors - accent color: Welsh green -->
         <item name="colorSecondary">@color/md_theme_secondary</item>
         <item name="colorOnSecondary">@color/md_theme_onSecondary</item>
         <item name="colorSecondaryContainer">@color/md_theme_secondaryContainer</item>
         <item name="colorOnSecondaryContainer">@color/md_theme_onSecondaryContainer</item>
 
-        <!-- Tertiary colors - tertiary color: green -->
+        <!-- Tertiary colors - tertiary color: warm gold -->
         <item name="colorTertiary">@color/md_theme_tertiary</item>
         <item name="colorOnTertiary">@color/md_theme_onTertiary</item>
         <item name="colorTertiaryContainer">@color/md_theme_tertiaryContainer</item>

@@ -260,7 +260,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 )
             )
         }
+        // Hide the Default subscription tab when there are other real subscriptions
+        // and the Default group has no servers
+        val hasRealSubscriptions = subscriptions.any {
+            it.guid != AppConfig.DEFAULT_SUBSCRIPTION_ID
+        }
         subscriptions.forEach { sub ->
+            if (sub.guid == AppConfig.DEFAULT_SUBSCRIPTION_ID
+                && hasRealSubscriptions
+                && MmkvManager.decodeServerList(AppConfig.DEFAULT_SUBSCRIPTION_ID).isEmpty()
+            ) {
+                return@forEach // skip empty Default tab
+            }
             groups.add(
                 GroupMapItem(
                     id = sub.guid,

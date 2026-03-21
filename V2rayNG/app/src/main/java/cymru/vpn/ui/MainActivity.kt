@@ -233,6 +233,11 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.add_subscription_url -> {
+            startActivity(Intent(this, SubEditActivity::class.java))
+            true
+        }
+
         R.id.import_qrcode -> {
             importQRcode()
             true

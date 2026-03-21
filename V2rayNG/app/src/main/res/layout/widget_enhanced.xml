@@ -79,8 +79,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:text="IP: ---"
-        android:textColor="#80FFFFFF"
-        android:textSize="10sp"
+        android:textColor="#B3FFFFFF"
+        android:textSize="13sp"
         android:maxLines="1" />
 
 </LinearLayout>

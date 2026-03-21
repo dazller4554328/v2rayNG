@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -14,6 +15,7 @@ import cymru.vpn.R
 import cymru.vpn.handler.MmkvManager
 import cymru.vpn.handler.SpeedtestManager
 import cymru.vpn.handler.V2RayServiceManager
+import cymru.vpn.ui.MainActivity
 import cymru.vpn.util.CountryUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,8 +78,9 @@ class WidgetProvider : AppWidgetProvider() {
         // Stop icon
         remoteViews.setImageViewResource(R.id.iv_widget_toggle, R.drawable.ic_stop_24dp)
 
-        // Status text
+        // Status text - green when connected
         remoteViews.setTextViewText(R.id.tv_widget_status, "Connected")
+        remoteViews.setTextColor(R.id.tv_widget_status, Color.parseColor("#4CAF50"))
 
         // Get selected server info
         val serverName = getServerDisplayInfo(context)
@@ -104,6 +107,7 @@ class WidgetProvider : AppWidgetProvider() {
                 updatedViews.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.widget_background_connected)
                 updatedViews.setImageViewResource(R.id.iv_widget_toggle, R.drawable.ic_stop_24dp)
                 updatedViews.setTextViewText(R.id.tv_widget_status, "Connected")
+                updatedViews.setTextColor(R.id.tv_widget_status, Color.parseColor("#4CAF50"))
                 updatedViews.setTextViewText(R.id.tv_widget_server, serverName.first)
                 updatedViews.setTextViewText(R.id.tv_widget_flag, serverName.second)
                 updatedViews.setTextViewText(R.id.tv_widget_ip, "IP: ${ipInfo ?: "unavailable"}")
@@ -129,8 +133,9 @@ class WidgetProvider : AppWidgetProvider() {
         // Play icon
         remoteViews.setImageViewResource(R.id.iv_widget_toggle, R.drawable.ic_play_24dp)
 
-        // Status
+        // Status - white when disconnected
         remoteViews.setTextViewText(R.id.tv_widget_status, "Not Connected")
+        remoteViews.setTextColor(R.id.tv_widget_status, Color.WHITE)
 
         // Get the selected server name to show what will connect
         val serverName = getServerDisplayInfo(context)
@@ -147,15 +152,27 @@ class WidgetProvider : AppWidgetProvider() {
     }
 
     private fun setToggleClickIntent(context: Context, remoteViews: RemoteViews) {
-        val intent = Intent(context, WidgetProvider::class.java)
-        intent.action = AppConfig.BROADCAST_ACTION_WIDGET_CLICK
-        val pendingIntent = PendingIntent.getBroadcast(
+        // Toggle button: start/stop VPN
+        val toggleIntent = Intent(context, WidgetProvider::class.java)
+        toggleIntent.action = AppConfig.BROADCAST_ACTION_WIDGET_CLICK
+        val togglePending = PendingIntent.getBroadcast(
             context,
             0,
-            intent,
+            toggleIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        remoteViews.setOnClickPendingIntent(R.id.layout_widget_toggle, pendingIntent)
+        remoteViews.setOnClickPendingIntent(R.id.layout_widget_toggle, togglePending)
+
+        // Whole widget: open the app
+        val openAppIntent = Intent(context, MainActivity::class.java)
+        openAppIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val openAppPending = PendingIntent.getActivity(
+            context,
+            1,
+            openAppIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        remoteViews.setOnClickPendingIntent(R.id.widget_root, openAppPending)
     }
 
     /**

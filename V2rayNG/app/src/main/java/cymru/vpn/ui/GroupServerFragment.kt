@@ -59,11 +59,7 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
 
         adapter = MainRecyclerAdapter(mainViewModel, ActivityAdapterListener())
         binding.recyclerView.setHasFixedSize(true)
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_DOUBLE_COLUMN_DISPLAY, false)) {
-            binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        } else {
-            binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
-        }
+        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
         addCustomDividerToRecyclerView(binding.recyclerView, R.drawable.custom_divider)
         binding.recyclerView.adapter = adapter
 
@@ -76,11 +72,15 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
             if (mainViewModel.subscriptionId != subId) {
                 return@observe
             }
-            // Log.d(TAG, "GroupServerFragment updateListAction subId=$subId")
             adapter.setData(mainViewModel.serversCache, index)
-        }
 
-        // Log.d(TAG, "GroupServerFragment onViewCreated: subId=$subId")
+            // Disable drag-and-drop when country groups are active
+            if (adapter.hasCountryGroups()) {
+                itemTouchHelper?.attachToRecyclerView(null)
+            } else {
+                itemTouchHelper?.attachToRecyclerView(binding.recyclerView)
+            }
+        }
     }
 
     override fun onResume() {
@@ -282,7 +282,8 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
     }
 
     /**
-     * Scrolls to the currently selected server in the RecyclerView
+     * Scrolls to the currently selected server in the RecyclerView.
+     * Automatically expands the country group if the server is in a collapsed group.
      */
     fun scrollToSelectedServer() {
         val selectedGuid = MmkvManager.getSelectServer()
@@ -291,23 +292,17 @@ class GroupServerFragment : BaseFragment<FragmentGroupServerBinding>(),
             return
         }
 
-        // Find the position of the selected server
-        val serversCache = mainViewModel.serversCache
-        val position = serversCache.indexOfFirst { it.guid == selectedGuid }
+        // Use adapter's expand-and-find to handle country groups
+        val position = adapter.expandAndFindServer(selectedGuid)
         val recyclerView = binding.recyclerView
 
         if (position >= 0) {
-            // Get the layout manager
             val layoutManager = recyclerView.layoutManager as? GridLayoutManager
-
             if (layoutManager != null) {
-                // Scroll to position with offset to center it on screen
-                // First scroll to position, then adjust to center
                 recyclerView.post {
                     layoutManager.scrollToPositionWithOffset(position, recyclerView.height / 3)
                 }
             } else {
-                // Fallback to smooth scroll if layout manager is not GridLayoutManager
                 recyclerView.smoothScrollToPosition(position)
             }
         } else {

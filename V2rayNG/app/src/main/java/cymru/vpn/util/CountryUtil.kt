@@ -134,4 +134,74 @@ object CountryUtil {
             ?: return ""
         return countryCodeToFlag(code)
     }
+
+    // Country code to English name mapping
+    private val countryNames = mapOf(
+        "US" to "United States",
+        "GB" to "United Kingdom",
+        "DE" to "Germany",
+        "FR" to "France",
+        "NL" to "Netherlands",
+        "JP" to "Japan",
+        "SG" to "Singapore",
+        "HK" to "Hong Kong",
+        "TW" to "Taiwan",
+        "KR" to "South Korea",
+        "CA" to "Canada",
+        "AU" to "Australia",
+        "IN" to "India",
+        "BR" to "Brazil",
+        "RU" to "Russia",
+        "TR" to "Turkey",
+        "SE" to "Sweden",
+        "NO" to "Norway",
+        "FI" to "Finland",
+        "DK" to "Denmark",
+        "CH" to "Switzerland",
+        "AT" to "Austria",
+        "IT" to "Italy",
+        "ES" to "Spain",
+        "PT" to "Portugal",
+        "PL" to "Poland",
+        "IE" to "Ireland",
+        "CZ" to "Czech Republic",
+        "RO" to "Romania",
+        "BG" to "Bulgaria",
+        "UA" to "Ukraine",
+        "IL" to "Israel",
+        "AE" to "UAE",
+        "ZA" to "South Africa",
+        "MX" to "Mexico",
+        "AR" to "Argentina",
+        "CL" to "Chile",
+        "CO" to "Colombia",
+        "PH" to "Philippines",
+        "TH" to "Thailand",
+        "VN" to "Vietnam",
+        "MY" to "Malaysia",
+        "ID" to "Indonesia",
+        "PK" to "Pakistan",
+        "BD" to "Bangladesh",
+        "KZ" to "Kazakhstan",
+        "LV" to "Latvia",
+        "LT" to "Lithuania",
+        "EE" to "Estonia",
+        "IS" to "Iceland",
+        "LU" to "Luxembourg",
+        "MD" to "Moldova",
+        "RS" to "Serbia",
+        "HR" to "Croatia",
+        "HU" to "Hungary",
+        "SK" to "Slovakia",
+        "GR" to "Greece",
+        "CY" to "Cyprus",
+    )
+
+    /**
+     * Converts a 2-letter ISO country code to its English display name.
+     * Returns the code itself if no name mapping exists.
+     */
+    fun getCountryName(countryCode: String): String {
+        return countryNames[countryCode.uppercase()] ?: countryCode.uppercase()
+    }
 }

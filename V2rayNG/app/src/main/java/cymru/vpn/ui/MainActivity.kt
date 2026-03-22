@@ -169,10 +169,11 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         // Remove existing marker
         mapMarker?.let { binding.mapView.overlays.remove(it) }
 
-        // Add new marker
+        // Add new marker with green dot icon
         val marker = Marker(binding.mapView)
         marker.position = point
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        marker.icon = ContextCompat.getDrawable(this, R.drawable.map_marker_green_dot)
         marker.title = countryName
         marker.snippet = ip
         binding.mapView.overlays.add(marker)

@@ -2,7 +2,7 @@
 <resources>
     <color name="color_fab_active">#EF5350</color>
     <color name="color_fab_inactive">#646464</color>
-    <color name="divider_color_light">#424242</color>
+    <color name="divider_color_light">#2A2A2E</color>
 
     <!-- Primary colors - main tone: light red for dark mode -->
     <color name="md_theme_primary">#FFB4AB</color>
@@ -28,21 +28,26 @@
     <color name="md_theme_onError">#690005</color>
     <color name="md_theme_onErrorContainer">#FFDAD6</color>
 
-    <!-- Background colors -->
-    <color name="md_theme_background">#1C1B1F</color>
+    <!-- Background colors - deeper dark for modern look -->
+    <color name="md_theme_background">#111114</color>
     <color name="md_theme_onBackground">#E6E1E5</color>
 
-    <!-- Surface colors -->
-    <color name="md_theme_surface">#1C1B1F</color>
+    <!-- Surface colors - layered surfaces for depth -->
+    <color name="md_theme_surface">#111114</color>
     <color name="md_theme_onSurface">#E6E1E5</color>
-    <color name="md_theme_surfaceVariant">#534341</color>
-    <color name="md_theme_onSurfaceVariant">#D8C2BF</color>
+    <color name="md_theme_surfaceVariant">#2A2A2E</color>
+    <color name="md_theme_onSurfaceVariant">#CAC4D0</color>
     <color name="md_theme_inverseSurface">#E6E1E5</color>
     <color name="md_theme_inverseOnSurface">#1C1B1F</color>
 
+    <!-- Surface container tones for card elevation -->
+    <color name="md_theme_surfaceContainer">#1D1D21</color>
+    <color name="md_theme_surfaceContainerHigh">#252529</color>
+    <color name="md_theme_surfaceContainerHighest">#2F2F33</color>
+
     <!-- Outline colors -->
-    <color name="md_theme_outline">#A08C8A</color>
-    <color name="md_theme_outlineVariant">#534341</color>
+    <color name="md_theme_outline">#938F99</color>
+    <color name="md_theme_outlineVariant">#2A2A2E</color>
 
     <!-- Other colors -->
     <color name="md_theme_inversePrimary">#B71C1C</color>

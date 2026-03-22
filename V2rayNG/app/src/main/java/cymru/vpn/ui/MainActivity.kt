@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -19,11 +20,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import cymru.vpn.AppConfig
 import cymru.vpn.R
 import cymru.vpn.databinding.ActivityMainBinding
+import cymru.vpn.dto.IPAPIInfo
 import cymru.vpn.enums.EConfigType
 import cymru.vpn.enums.PermissionType
 import cymru.vpn.extension.toast
@@ -33,12 +36,17 @@ import cymru.vpn.handler.MmkvManager
 import cymru.vpn.handler.SettingsChangeManager
 import cymru.vpn.handler.SettingsManager
 import cymru.vpn.handler.V2RayServiceManager
+import cymru.vpn.util.CountryUtil
 import cymru.vpn.util.Utils
 import cymru.vpn.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
 
 class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val binding by lazy {
@@ -48,6 +56,8 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
     val mainViewModel: MainViewModel by viewModels()
     private lateinit var groupPagerAdapter: GroupPagerAdapter
     private var tabMediator: TabLayoutMediator? = null
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private var mapMarker: Marker? = null
 
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
@@ -85,6 +95,8 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             override fun handleOnBackPressed() {
                 if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
@@ -97,6 +109,8 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         binding.fabLocate.setOnClickListener { locateSelectedServer() }
         binding.layoutTest.setOnClickListener { handleLayoutTestClick() }
 
+        setupBottomSheet()
+        setupMap()
         setupGroupTab()
         setupViewModel()
         mainViewModel.reloadServerList()
@@ -105,13 +119,98 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         }
     }
 
+    private fun setupBottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+        bottomSheetBehavior.peekHeight = resources.getDimensionPixelSize(R.dimen.bottom_sheet_peek_height)
+        bottomSheetBehavior.isHideable = false
+    }
+
+    private fun setupMap() {
+        val osmConfig = Configuration.getInstance()
+        osmConfig.userAgentValue = packageName
+        osmConfig.osmdroidBasePath = cacheDir
+
+        binding.mapView.setTileSource(TileSourceFactory.MAPNIK)
+        binding.mapView.setMultiTouchControls(true)
+        binding.mapView.controller.setZoom(3.0)
+        binding.mapView.controller.setCenter(GeoPoint(30.0, 0.0))
+        @Suppress("DEPRECATION")
+        binding.mapView.setBuiltInZoomControls(false)
+    }
+
+    private fun updateMapLocation(ipInfo: IPAPIInfo) {
+        val lat = ipInfo.latitude ?: return
+        val lng = ipInfo.longitude ?: return
+        val countryName = ipInfo.resolveCountryName() ?: "Unknown"
+        val ip = ipInfo.resolveIp() ?: ""
+
+        val point = GeoPoint(lat, lng)
+
+        // Remove existing marker
+        mapMarker?.let { binding.mapView.overlays.remove(it) }
+
+        // Add new marker
+        val marker = Marker(binding.mapView)
+        marker.position = point
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        marker.title = countryName
+        marker.snippet = ip
+        binding.mapView.overlays.add(marker)
+        mapMarker = marker
+
+        // Animate to the location
+        binding.mapView.controller.animateTo(point)
+        binding.mapView.controller.setZoom(5.0)
+    }
+
+    private fun clearMap() {
+        mapMarker?.let { binding.mapView.overlays.remove(it) }
+        mapMarker = null
+        binding.mapView.controller.setZoom(3.0)
+        binding.mapView.controller.setCenter(GeoPoint(30.0, 0.0))
+        binding.mapView.invalidate()
+    }
+
     private fun setupViewModel() {
         mainViewModel.updateTestResultAction.observe(this) { setTestState(it) }
         mainViewModel.isRunning.observe(this) { isRunning ->
             applyRunningState(false, isRunning)
         }
+        mainViewModel.ipInfoAction.observe(this) { ipInfo ->
+            if (ipInfo != null) {
+                updateConnectionInfo(ipInfo)
+                updateMapLocation(ipInfo)
+            }
+        }
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
+    }
+
+    private fun updateConnectionInfo(ipInfo: IPAPIInfo) {
+        val ip = ipInfo.resolveIp()
+        val countryCode = ipInfo.resolveCountryCode()
+        val countryName = ipInfo.resolveCountryName()
+
+        if (!ip.isNullOrBlank()) {
+            binding.tvIpInfo.text = "IP: $ip"
+            binding.tvIpInfo.visibility = View.VISIBLE
+        }
+
+        if (!countryName.isNullOrBlank()) {
+            binding.tvCountryName.text = countryName
+            binding.tvCountryName.visibility = View.VISIBLE
+        }
+
+        if (!countryCode.isNullOrBlank()) {
+            binding.tvCountryFlag.text = CountryUtil.countryCodeToFlag(countryCode)
+            binding.tvCountryFlag.visibility = View.VISIBLE
+        }
+    }
+
+    private fun clearConnectionInfo() {
+        binding.tvIpInfo.visibility = View.GONE
+        binding.tvCountryName.visibility = View.GONE
+        binding.tvCountryFlag.visibility = View.GONE
     }
 
     private fun setupGroupTab() {
@@ -192,21 +291,31 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             binding.fab.contentDescription = getString(R.string.action_stop_service)
             setTestState(getString(R.string.connection_connected))
             binding.layoutTest.isFocusable = true
+
+            // Fetch IP info when connected
+            mainViewModel.fetchIPInfo()
         } else {
             binding.fab.setImageResource(R.drawable.ic_play_24dp)
             binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
             binding.fab.contentDescription = getString(R.string.tasker_start_service)
             setTestState(getString(R.string.connection_not_connected))
             binding.layoutTest.isFocusable = false
+
+            // Clear connection info and map when disconnected
+            clearConnectionInfo()
+            clearMap()
+            mainViewModel.ipInfoAction.value = null
         }
     }
 
     override fun onResume() {
         super.onResume()
+        binding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -618,6 +727,10 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
+            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                return true
+            }
             moveTaskToBack(false)
             return true
         }
@@ -646,6 +759,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onDestroy() {
         tabMediator?.detach()
+        binding.mapView.onDetach()
         super.onDestroy()
     }
 }

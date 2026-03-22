@@ -15,6 +15,7 @@ import cymru.vpn.AngApplication
 import cymru.vpn.AppConfig
 import cymru.vpn.R
 import cymru.vpn.dto.GroupMapItem
+import cymru.vpn.dto.IPAPIInfo
 import cymru.vpn.dto.ServersCache
 import cymru.vpn.dto.SubscriptionCache
 import cymru.vpn.dto.SubscriptionUpdateResult
@@ -44,6 +45,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
+    val ipInfoAction by lazy { MutableLiveData<IPAPIInfo?>() }
     private val tcpingTestScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     /**
@@ -216,6 +218,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     serverGuids = if (keywordFilter.isNotEmpty()) serversCache.map { it.guid } else emptyList()
                 )
             )
+        }
+    }
+
+    /**
+     * Fetches remote IP geolocation info when connected.
+     */
+    fun fetchIPInfo() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val ipInfo = SpeedtestManager.getRemoteIPInfoFull()
+                withContext(Dispatchers.Main) {
+                    ipInfoAction.value = ipInfo
+                }
+            } catch (e: Exception) {
+                Log.e(AppConfig.TAG, "Failed to fetch IP info", e)
+            }
         }
     }
 

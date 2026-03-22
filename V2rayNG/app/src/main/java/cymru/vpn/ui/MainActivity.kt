@@ -44,8 +44,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.overlay.Marker
 
 class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -130,7 +132,25 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         osmConfig.userAgentValue = packageName
         osmConfig.osmdroidBasePath = cacheDir
 
-        binding.mapView.setTileSource(TileSourceFactory.MAPNIK)
+        // Dark map style similar to NordVPN / CartoDB Dark Matter
+        val darkTileSource = object : OnlineTileSourceBase(
+            "CartoDB Dark Matter",
+            0, 18, 256, ".png",
+            arrayOf(
+                "https://a.basemaps.cartocdn.com/dark_all/",
+                "https://b.basemaps.cartocdn.com/dark_all/",
+                "https://c.basemaps.cartocdn.com/dark_all/"
+            )
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                val zoom = MapTileIndex.getZoom(pMapTileIndex)
+                val x = MapTileIndex.getX(pMapTileIndex)
+                val y = MapTileIndex.getY(pMapTileIndex)
+                return "$baseUrl$zoom/$x/$y$mImageFilenameEnding"
+            }
+        }
+
+        binding.mapView.setTileSource(darkTileSource)
         binding.mapView.setMultiTouchControls(true)
         binding.mapView.controller.setZoom(3.0)
         binding.mapView.controller.setCenter(GeoPoint(30.0, 0.0))
@@ -158,9 +178,10 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         binding.mapView.overlays.add(marker)
         mapMarker = marker
 
-        // Animate to the location
-        binding.mapView.controller.animateTo(point)
+        // Center and zoom to the location immediately
         binding.mapView.controller.setZoom(5.0)
+        binding.mapView.controller.setCenter(point)
+        binding.mapView.invalidate()
     }
 
     private fun clearMap() {

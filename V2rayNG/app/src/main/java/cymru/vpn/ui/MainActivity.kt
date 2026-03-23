@@ -304,8 +304,11 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             binding.tvTestState.setTextColor(0xFF00C853.toInt()) // green
             binding.layoutTest.isFocusable = true
 
-            // Fetch IP info when connected
-            mainViewModel.fetchIPInfo()
+            // Fetch IP info after VPN tunnel establishes
+            lifecycleScope.launch {
+                delay(3000)
+                mainViewModel.fetchIPInfo()
+            }
         } else {
             binding.fab.setImageResource(R.drawable.ic_play_24dp)
             binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
@@ -324,6 +327,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
+        mainViewModel.reloadServerList()
     }
 
     override fun onPause() {

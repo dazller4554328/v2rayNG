@@ -1,5 +1,6 @@
 package cymru.vpn.ui
 
+import android.app.Activity
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Menu
@@ -122,6 +123,7 @@ class SubEditActivity : BaseActivity() {
                     } else {
                         toast(R.string.toast_failure)
                     }
+                    setResult(Activity.RESULT_OK)
                     finish()
                 }
             }

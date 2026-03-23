@@ -20,6 +20,7 @@ import cymru.vpn.dto.ServersCache
 import cymru.vpn.dto.SubscriptionCache
 import cymru.vpn.dto.SubscriptionUpdateResult
 import cymru.vpn.dto.TestServiceMessage
+import cymru.vpn.extension.matchesPattern
 import cymru.vpn.extension.serializable
 import cymru.vpn.extension.toastError
 import cymru.vpn.extension.toastSuccess
@@ -36,6 +37,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Collections
+import java.util.regex.PatternSyntaxException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = mutableListOf<String>() // MmkvManager.decodeServerList()
@@ -119,7 +121,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     @Synchronized
     fun updateCache() {
         serversCache.clear()
-        val kw = keywordFilter.trim().lowercase()
+        val kw = keywordFilter.trim()
+        val searchRegex = try {
+            if (kw.isNotEmpty()) Regex(kw, setOf(RegexOption.IGNORE_CASE)) else null
+        } catch (e: PatternSyntaxException) {
+            null // Fallback to literal search if regex is invalid
+        }
         for (guid in serverList) {
             val profile = MmkvManager.decodeServerConfig(guid) ?: continue
             if (kw.isEmpty()) {
@@ -127,11 +134,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 continue
             }
 
-            val remarks = profile.remarks.lowercase()
-            val description = profile.description.orEmpty().lowercase()
-            val server = profile.server.orEmpty().lowercase()
-
-            if (remarks.contains(kw) || description.contains(kw) || server.contains(kw)) {
+            val remarks = profile.remarks
+            val description = profile.description.orEmpty()
+            val server = profile.server.orEmpty()
+            val protocol = profile.configType.name
+            if (remarks.matchesPattern(searchRegex, kw)
+                || description.matchesPattern(searchRegex, kw)
+                || server.matchesPattern(searchRegex, kw)
+                || protocol.matchesPattern(searchRegex, kw)
+            ) {
                 serversCache.add(ServersCache(guid, profile))
             }
         }

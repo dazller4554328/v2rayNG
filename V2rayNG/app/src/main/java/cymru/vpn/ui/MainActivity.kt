@@ -327,6 +327,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
+        setupGroupTab()
         mainViewModel.reloadServerList()
     }
 

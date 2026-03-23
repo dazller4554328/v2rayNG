@@ -9,9 +9,11 @@ import androidx.lifecycle.lifecycleScope
 import cymru.vpn.AppConfig
 import cymru.vpn.R
 import cymru.vpn.databinding.ActivitySubEditBinding
+import cymru.vpn.dto.SubscriptionCache
 import cymru.vpn.dto.SubscriptionItem
 import cymru.vpn.extension.toast
 import cymru.vpn.extension.toastSuccess
+import cymru.vpn.handler.AngConfigManager
 import cymru.vpn.handler.MmkvManager
 import cymru.vpn.handler.SettingsChangeManager
 import cymru.vpn.handler.SettingsManager
@@ -104,9 +106,29 @@ class SubEditActivity : BaseActivity() {
             }
         }
 
-        MmkvManager.encodeSubscription(editSubId, subItem)
-        toastSuccess(R.string.toast_success)
-        finish()
+        val isNew = editSubId.isEmpty()
+        val subId = editSubId.ifBlank { Utils.getUuid() }
+        MmkvManager.encodeSubscription(subId, subItem)
+
+        if (isNew && subItem.url.isNotEmpty()) {
+            toast(R.string.title_sub_update)
+            lifecycleScope.launch(Dispatchers.IO) {
+                val result = AngConfigManager.updateConfigViaSub(
+                    SubscriptionCache(subId, subItem)
+                )
+                launch(Dispatchers.Main) {
+                    if (result.configCount > 0) {
+                        toastSuccess(getString(R.string.title_update_config_count, result.configCount))
+                    } else {
+                        toast(R.string.toast_failure)
+                    }
+                    finish()
+                }
+            }
+        } else {
+            toastSuccess(R.string.toast_success)
+            finish()
+        }
         return true
     }
 
